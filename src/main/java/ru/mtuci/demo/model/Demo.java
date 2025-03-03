@@ -1,3 +1,4 @@
+/*
 package ru.mtuci.demo.model;
 
 public class Demo {
@@ -29,3 +30,4 @@ public class Demo {
         return number;
     }
 }
+*/
