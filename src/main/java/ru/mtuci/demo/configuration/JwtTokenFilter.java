@@ -22,7 +22,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        //TODO: написать тело метода для получения и проверки токена
         if (token != null && jwtTokenProvider.validateToken(token)) {
             String tokenType = jwtTokenProvider.getTokenType(token);
 
