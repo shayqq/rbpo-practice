@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.mtuci.demo.configuration.JwtTokenProvider;
 import ru.mtuci.demo.model.ApplicationUser;
 import ru.mtuci.demo.model.AuthenticationRequest;
 import ru.mtuci.demo.model.AuthenticationResponse;
@@ -31,37 +32,41 @@ public class AuthenticationController {
 
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
-    private Authentication authentication;
+    private final JwtTokenProvider jwtTokenProvider;
+    /*private Authentication authentication;
     private SecurityContextRepository securityContextRepository =
             new HttpSessionSecurityContextRepository();
-    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();*/
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest, HttpServletRequest request, HttpServletResponse response) {
         try {
 
-            UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(authenticationRequest.getEmail(), authenticationRequest.getPassword());
+            //UsernamePasswordAuthenticationToken token = UsernamePasswordAuthenticationToken.unauthenticated(authenticationRequest.getEmail(), authenticationRequest.getPassword());
 
-            //String email = authenticationRequest.getEmail();
+            String email = authenticationRequest.getEmail();
 
-            //ApplicationUser user = userRepository.findByEmail(email)
-             //       .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
+            ApplicationUser user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
 
-            //authenticationManager
-              //      .authenticate(
-                //            new UsernamePasswordAuthenticationToken(
-                  //                  email, authenticationRequest.getPassword())
-                    //);
+            authenticationManager
+                    .authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    email, authenticationRequest.getPassword())
+                    );
 
-            authentication = authenticationManager.authenticate(token);
+            /*authentication = authenticationManager.authenticate(token);
             SecurityContext context = securityContextHolderStrategy.createEmptyContext();
             context.setAuthentication(authentication);
             securityContextHolderStrategy.setContext(context);
-            securityContextRepository.saveContext(context, request, response);
+            securityContextRepository.saveContext(context, request, response);*/
 
             //TokenResponse tokenResponse = tokenService.issueTokenPair(email, request.getDeviceId(), user.getRole().getGrantedAuthorities());
 
-            return ResponseEntity.ok(new AuthenticationResponse(authenticationRequest.getEmail()));
+            String token = jwtTokenProvider
+                    .createToken(email, user.getRole().getGrantedAuthorities());
+
+            return ResponseEntity.ok(new AuthenticationResponse(email, token));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Неверная почта или пароль!");
