@@ -37,25 +37,17 @@ public class LicenseCreateController {
             Long ownerId = request.getOwnerId();
             Long licenseTypeId = request.getLicenseTypeId();
 
-            if (productService.getProductById(productId).isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Продукт не найден!");
-            }
+            if (productService.getProductById(productId).isEmpty())
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Продукт не найден!");
 
-            if (productService.getProductById(productId).get().isBlocked()){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Продукт не доступен!");
-            }
+            if (productService.getProductById(productId).get().isBlocked())
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Продукт не доступен!");
 
-            if (userService.getUserById(ownerId).isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Владелец не найден!");
-            }
+            if (userService.getUserById(ownerId).isEmpty())
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Владелец не найден!");
 
-            if (licenseTypeService.getLicenseTypeById(licenseTypeId).isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Тип лицензии не найден!");
-            }
+            if (licenseTypeService.getLicenseTypeById(licenseTypeId).isEmpty())
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Тип лицензии не найден!");
 
             String email = jwtTokenProvider.getUsername(req.getHeader("Authorization").substring(7));
             ApplicationUser user = userDetailsService.getUserByEmail(email).get();
@@ -63,9 +55,8 @@ public class LicenseCreateController {
             Long id = licenseService.createLicense(productId, ownerId, licenseTypeId, user, request.getCount());
 
             return ResponseEntity.status(HttpStatus.OK).body("Лицензия успешно создана\nID: " + id);
-        } catch (Exception ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Технические шоколадки...");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
         }
     }
 
