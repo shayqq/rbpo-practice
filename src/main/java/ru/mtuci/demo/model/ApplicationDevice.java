@@ -7,21 +7,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "device")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApplicationUser {
+public class ApplicationDevice {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    private String username;
-    private String password;
-    private String email;
+    private String name;
 
-    private ApplicationRole role;
+    private String macAddress;
+
+    @ManyToOne
+    @JoinColumn(name = "userId")
+    private ApplicationUser user;
 
 }

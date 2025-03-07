@@ -1,4 +1,4 @@
-package ru.mtuci.demo.model;
+package ru.mtuci.demo.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

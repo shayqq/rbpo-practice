@@ -17,7 +17,7 @@ import ru.mtuci.demo.service.impl.UserServiceImpl;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+@RestController("/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -33,7 +33,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(users);
         }
         catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
         }
     }
 
@@ -53,7 +53,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(data);
         }
         catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
         }
     }
 
@@ -64,25 +64,20 @@ public class UserController {
             String username = registrationRequest.getUsername();
             String email = registrationRequest.getEmail();
 
-            if (registrationRequest.getUsername() == null) {
+            if (registrationRequest.getUsername() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите логин");
-            }
 
-            if (registrationRequest.getPassword() == null) {
+            if (registrationRequest.getPassword() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите пароль");
-            }
 
-            if (registrationRequest.getEmail() == null) {
+            if (registrationRequest.getEmail() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите почту");
-            }
 
-            if (userRepository.findByUsername(registrationRequest.getUsername()).isPresent()) {
+            if (userRepository.findByUsername(registrationRequest.getUsername()).isPresent())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Пользователь с таким логином уже существует!");
-            }
 
-            if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
+            if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Данная почта уже используется!");
-            }
 
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -104,9 +99,12 @@ public class UserController {
     @PutMapping("/updateUseradm")
     public ResponseEntity<?> updateUseradm(@RequestBody ApplicationUser applicationUser) {
         try {
-            if (applicationUser.getId() == null) throw new IllegalArgumentException("Введите Id пользователя!");
-            ApplicationUser user = userRepository.findById(applicationUser.getId())
-                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
+            if (applicationUser.getId() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id пользователя!");
+            Optional<ApplicationUser> userOptional = userRepository.findById(applicationUser.getId());
+            if (!userOptional.isPresent())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Пользователь не найден!");
+            ApplicationUser user = userOptional.get();
             if (applicationUser.getUsername() == null) applicationUser.setUsername(user.getUsername());
             if (applicationUser.getPassword() == null) applicationUser.setPassword(user.getPassword());
             else applicationUser.setPassword(securityConfig.passwordEncoder().encode(applicationUser.getPassword()));
@@ -123,10 +121,12 @@ public class UserController {
     @DeleteMapping("/deleteUseradm")
     public ResponseEntity<?> deleteUseradm(@RequestBody ApplicationUser applicationUser) {
         try {
-            if (applicationUser.getId() == null) throw new IllegalArgumentException("Введите Id пользователя!");
-            ApplicationUser user = userRepository.findById(applicationUser.getId())
-                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
-            userRepository.delete(user);
+            if (applicationUser.getId() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id пользователя!");
+            Optional<ApplicationUser> userOptional = userRepository.findById(applicationUser.getId());
+            if (!userOptional.isPresent())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Пользователь не найден!");
+            userRepository.delete(userOptional.get());
             return ResponseEntity.status(HttpStatus.OK).body("Пользователь успешно удален!");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");

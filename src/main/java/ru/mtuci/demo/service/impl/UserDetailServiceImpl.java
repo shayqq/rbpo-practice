@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.mtuci.demo.model.ApplicationUser;
 import ru.mtuci.demo.model.UserDetailsImpl;
 import ru.mtuci.demo.repository.UserRepository;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,14 @@ public class UserDetailServiceImpl implements UserDetailsService {
         ApplicationUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
         return UserDetailsImpl.fromApplicationUser(user);
+    }
+
+    public Optional<ApplicationUser> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public Optional<ApplicationUser> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
 }

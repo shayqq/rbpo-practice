@@ -24,25 +24,20 @@ public class RegistrationController {
             String username = registrationRequest.getUsername();
             String email = registrationRequest.getEmail();
 
-            if (registrationRequest.getUsername() == null) {
+            if (registrationRequest.getUsername() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите логин");
-            }
 
-            if (registrationRequest.getPassword() == null) {
+            if (registrationRequest.getPassword() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите пароль");
-            }
 
-            if (registrationRequest.getEmail() == null) {
+            if (registrationRequest.getEmail() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите почту");
-            }
 
-            if (userRepository.findByUsername(registrationRequest.getUsername()).isPresent()) {
+            if (userRepository.findByUsername(registrationRequest.getUsername()).isPresent())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Пользователь с таким логином уже существует!");
-            }
 
-            if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
+            if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Данная почта уже используется!");
-            }
 
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
