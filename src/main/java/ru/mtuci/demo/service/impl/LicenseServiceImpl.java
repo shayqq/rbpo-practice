@@ -141,8 +141,8 @@ public class LicenseServiceImpl implements LicenseService {
         ApplicationTicket ticket = new ApplicationTicket();
         Optional<ApplicationLicense> license = licenseRepository.findByCode(code);
         if (license.isEmpty()) {
-            ticket.setInfo("The license was not found");
-            ticket.setStatus("Error");
+            ticket.setInfo("Неправильный код активации");
+            ticket.setStatus("Ошибка");
             deviceServiceImpl.deleteLastDevice(user);
             return ticket;
         }
@@ -152,8 +152,8 @@ public class LicenseServiceImpl implements LicenseService {
                 || (newLicense.getEndingDate() != null && new Date().after(newLicense.getEndingDate()))
                 || (newLicense.getUser() != null && !Objects.equals(newLicense.getUser().getId(), user.getId()))
                 || deviceLicenseService.getDeviceCountForLicense(newLicense.getId()) >= newLicense.getDeviceCount()){
-            ticket.setInfo("Activation is not possible");
-            ticket.setStatus("Error");
+            ticket.setInfo("Активация невозможна");
+            ticket.setStatus("Ошибка");
             deviceServiceImpl.deleteLastDevice(user);
             return ticket;
         }
@@ -169,10 +169,9 @@ public class LicenseServiceImpl implements LicenseService {
 
         deviceLicenseService.createDeviceLicense(newLicense, device);
         licenseRepository.save(newLicense);
-        licenseHistoryService.createNewRecord("Activated", "Valid license", user,
-                newLicense);
+        licenseHistoryService.createNewRecord("Активно", "Действительная лицензия", user, newLicense);
 
-        ticket = createTicket(user, device, newLicense, "The license has been successfully activated", "OK");
+        ticket = createTicket(user, device, newLicense, "Лицензия была успешно активирована", "OK");
 
         return ticket;
     }

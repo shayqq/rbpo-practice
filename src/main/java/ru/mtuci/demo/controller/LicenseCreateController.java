@@ -31,11 +31,12 @@ public class LicenseCreateController {
 
     @PostMapping("/createadm")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createLicense(@RequestBody LicenseCreateRequest request, HttpServletRequest req) {
+    public ResponseEntity<?> createadm(@RequestBody LicenseCreateRequest licenseCreateRequest,
+                                           HttpServletRequest httpServletRequest) {
         try {
-            Long productId = request.getProductId();
-            Long ownerId = request.getOwnerId();
-            Long licenseTypeId = request.getLicenseTypeId();
+            Long productId = licenseCreateRequest.getProductId();
+            Long ownerId = licenseCreateRequest.getOwnerId();
+            Long licenseTypeId = licenseCreateRequest.getLicenseTypeId();
 
             if (productService.getProductById(productId).isEmpty())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Продукт не найден!");
@@ -49,10 +50,10 @@ public class LicenseCreateController {
             if (licenseTypeService.getLicenseTypeById(licenseTypeId).isEmpty())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Тип лицензии не найден!");
 
-            String email = jwtTokenProvider.getUsername(req.getHeader("Authorization").substring(7));
+            String email = jwtTokenProvider.getUsername(httpServletRequest.getHeader("Authorization").substring(7));
             ApplicationUser user = userDetailsService.getUserByEmail(email).get();
 
-            Long id = licenseService.createLicense(productId, ownerId, licenseTypeId, user, request.getCount());
+            Long id = licenseService.createLicense(productId, ownerId, licenseTypeId, user, licenseCreateRequest.getCount());
 
             return ResponseEntity.status(HttpStatus.OK).body("Лицензия успешно создана\nID: " + id);
         } catch (Exception e) {

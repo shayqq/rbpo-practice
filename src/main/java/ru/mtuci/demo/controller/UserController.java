@@ -58,8 +58,8 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/createUseradm")
-    public ResponseEntity<?> createUseradm(@RequestBody RegistrationRequest registrationRequest) {
+    @PostMapping("/createadm")
+    public ResponseEntity<?> createadm(@RequestBody RegistrationRequest registrationRequest) {
         try {
             String username = registrationRequest.getUsername();
             String email = registrationRequest.getEmail();
@@ -96,8 +96,8 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/updateUseradm")
-    public ResponseEntity<?> updateUseradm(@RequestBody ApplicationUser applicationUser) {
+    @PutMapping("/updateadm")
+    public ResponseEntity<?> updateadm(@RequestBody ApplicationUser applicationUser) {
         try {
             if (applicationUser.getId() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id пользователя!");
@@ -118,8 +118,8 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/deleteUseradm")
-    public ResponseEntity<?> deleteUseradm(@RequestBody ApplicationUser applicationUser) {
+    @DeleteMapping("/deleteadm")
+    public ResponseEntity<?> deleteadm(@RequestBody ApplicationUser applicationUser) {
         try {
             if (applicationUser.getId() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id пользователя!");
