@@ -21,9 +21,6 @@ public class RegistrationController {
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
         try {
-            String username = registrationRequest.getUsername();
-            String email = registrationRequest.getEmail();
-
             if (registrationRequest.getUsername() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите логин");
 
@@ -42,9 +39,9 @@ public class RegistrationController {
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
             ApplicationUser newUser = new ApplicationUser();
-            newUser.setUsername(username);
+            newUser.setUsername(registrationRequest.getUsername());
             newUser.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
-            newUser.setEmail(email);
+            newUser.setEmail(registrationRequest.getEmail());
             newUser.setRole(ApplicationRole.USER);
 
             userRepository.save(newUser);

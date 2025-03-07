@@ -32,8 +32,13 @@ public class AuthenticationController {
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest,
                                    HttpServletRequest request, HttpServletResponse response) {
         try {
-
             String email = authenticationRequest.getEmail();
+
+            if (email == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите почту!");
+
+            if (authenticationRequest.getPassword() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите пароль!");
 
             ApplicationUser user = userRepository.findByEmail(email).orElseThrow(() ->
                     new UsernameNotFoundException("Пользователь не найден!"));

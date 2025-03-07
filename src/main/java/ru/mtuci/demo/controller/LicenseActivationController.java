@@ -17,6 +17,9 @@ import ru.mtuci.demo.service.impl.DeviceServiceImpl;
 import ru.mtuci.demo.service.impl.LicenseServiceImpl;
 import ru.mtuci.demo.service.impl.UserDetailServiceImpl;
 
+import java.awt.geom.RectangularShape;
+import java.net.http.HttpResponse;
+
 @RestController
 @RequestMapping("/license")
 @RequiredArgsConstructor
@@ -31,6 +34,15 @@ public class LicenseActivationController {
     public ResponseEntity<?> activate(@RequestBody LicenseActivationRequest licenseActivationRequest,
                                       HttpServletRequest httpServletRequest) {
         try {
+            if (licenseActivationRequest.getActivationCode() == null) 
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите код активации!");
+
+            if (licenseActivationRequest.getName() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите имя!");
+
+            if (licenseActivationRequest.getMac_address() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите MAC-Адрес!");
+
             String email = jwtTokenProvider.getUsername(httpServletRequest.getHeader("Authorization").substring(7));
             ApplicationUser user = userDetailsService.getUserByEmail(email).get();
             ApplicationDevice device = deviceService.registerOrUpdateDevice(licenseActivationRequest.getMac_address(),
