@@ -27,7 +27,8 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public ApplicationDevice registerOrUpdateDevice(String mac, String name, ApplicationUser user) {
-        ApplicationDevice newDevice = getDeviceByInfo(user, mac, name).orElse(new ApplicationDevice());
+        if (getDeviceByInfo(user, mac, name).isPresent()) return getDeviceByInfo(user, mac, name).get();
+        ApplicationDevice newDevice = new ApplicationDevice();
         newDevice.setName(name);
         newDevice.setMacAddress(mac);
         newDevice.setUser(user);

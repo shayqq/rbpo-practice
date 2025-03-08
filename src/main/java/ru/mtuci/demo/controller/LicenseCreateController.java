@@ -15,7 +15,7 @@ import ru.mtuci.demo.request.LicenseCreateRequest;
 import ru.mtuci.demo.service.impl.LicenseServiceImpl;
 import ru.mtuci.demo.service.impl.LicenseTypeServiceImpl;
 import ru.mtuci.demo.service.impl.ProductServiceImpl;
-import ru.mtuci.demo.service.impl.UserDetailServiceImpl;
+import ru.mtuci.demo.service.impl.UserDetailsServiceImpl;
 
 @RestController
 @RequestMapping("/license")
@@ -23,11 +23,11 @@ import ru.mtuci.demo.service.impl.UserDetailServiceImpl;
 public class LicenseCreateController {
 
     private final ProductServiceImpl productService;
-    private final UserDetailServiceImpl userService;
+    private final UserDetailsServiceImpl userService;
     private final LicenseTypeServiceImpl licenseTypeService;
     private final LicenseServiceImpl licenseService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserDetailServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @PostMapping("/createadm")
     @PreAuthorize("hasRole('ADMIN')")
@@ -37,6 +37,19 @@ public class LicenseCreateController {
             Long productId = licenseCreateRequest.getProductId();
             Long ownerId = licenseCreateRequest.getOwnerId();
             Long licenseTypeId = licenseCreateRequest.getLicenseTypeId();
+
+            if (productId == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id продукта!");
+
+            if (ownerId == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id владельца!");
+
+            if (licenseTypeId == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id типа лицензии!");
+
+            if (licenseCreateRequest.getCount() == null || licenseCreateRequest.getCount() <= 0)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Введите количество девайсов, на которых может быть размещена лицензия!");
 
             if (productService.getProductById(productId).isEmpty())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Продукт не найден!");

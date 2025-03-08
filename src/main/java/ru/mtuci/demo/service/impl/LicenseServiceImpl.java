@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.mtuci.demo.model.*;
+import ru.mtuci.demo.repository.DeviceLicenseRepository;
 import ru.mtuci.demo.repository.LicenseRepository;
 import ru.mtuci.demo.service.LicenseService;
 import java.security.*;
@@ -19,8 +20,9 @@ public class LicenseServiceImpl implements LicenseService {
     private final ProductServiceImpl productService;
     private final DeviceLicenseServiceImpl deviceLicenseService;
     private final LicenseHistoryServiceImpl licenseHistoryService;
-    private final UserDetailServiceImpl userDetailsServiceImpl;
-    private final DeviceServiceImpl deviceServiceImpl;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final DeviceServiceImpl deviceService;
+    private final DeviceLicenseRepository deviceLicenseRepository;
 
     @Override
     public Optional<ApplicationLicense> getLicenseById(Long id) {
@@ -31,21 +33,22 @@ public class LicenseServiceImpl implements LicenseService {
     public Long createLicense(Long productId, Long ownerId, Long licenseTypeId, ApplicationUser user, Long count) {
         ApplicationLicenseType licenseType = licenseTypeService.getLicenseTypeById(licenseTypeId).get();
         ApplicationProduct product = productService.getProductById(productId).get();
+        ApplicationUser ownerUser = userDetailsService.getUserById(ownerId).get();
         ApplicationLicense newLicense = new ApplicationLicense();
-        String uid = String.valueOf(UUID.randomUUID());
-        while (licenseRepository.findByCode(uid).isPresent()) uid = String.valueOf(UUID.randomUUID());
-        newLicense.setCode(uid);
+        String code = String.valueOf(UUID.randomUUID());
+        while (licenseRepository.findByCode(code).isPresent()) code = String.valueOf(UUID.randomUUID());
+        newLicense.setCode(code);
         newLicense.setProduct(product);
         newLicense.setLicenseType(licenseType);
         newLicense.setBlocked(product.isBlocked());
         newLicense.setDeviceCount(count);
-        newLicense.setOwnerId(userDetailsServiceImpl.getUserById(ownerId).get());
+        newLicense.setOwner(ownerUser);
         newLicense.setDuration(licenseType.getDefaultDuration());
         newLicense.setDescription(licenseType.getDescription());
 
         licenseRepository.save(newLicense);
 
-        licenseHistoryService.createNewRecord("Not activated", "Created new license", user,
+        licenseHistoryService.createNewRecord("Не активирована", "Создана новая лицензия", user,
                 licenseRepository.findTopByOrderByIdDesc().get());
 
         return licenseRepository.findTopByOrderByIdDesc().get().getId();
@@ -105,7 +108,7 @@ public class LicenseServiceImpl implements LicenseService {
             return Base64.getEncoder().encodeToString(signature.sign());
         }
         catch (Exception e){
-            return "Something went wrong. The signature is not valid";
+            return "Что-то пошло не так. Подпись не действительна";
         }
     }
 
@@ -143,18 +146,24 @@ public class LicenseServiceImpl implements LicenseService {
         if (license.isEmpty()) {
             ticket.setInfo("Неправильный код активации");
             ticket.setStatus("Ошибка");
-            deviceServiceImpl.deleteLastDevice(user);
+            if (deviceLicenseRepository.findByDeviceId(device.getId()).isEmpty()) deviceService.deleteLastDevice(user);
             return ticket;
         }
 
         ApplicationLicense newLicense = license.get();
+        if (!deviceLicenseRepository.findByDeviceIdAndLicenseId(device.getId(), newLicense.getId()).isEmpty()) {
+            ticket.setInfo("Активация невозможна");
+            ticket.setStatus("Ошибка");
+            return ticket;
+        }
+
         if (newLicense.isBlocked()
                 || (newLicense.getEndingDate() != null && new Date().after(newLicense.getEndingDate()))
                 || (newLicense.getUser() != null && !Objects.equals(newLicense.getUser().getId(), user.getId()))
-                || deviceLicenseService.getDeviceCountForLicense(newLicense.getId()) >= newLicense.getDeviceCount()){
+                || deviceLicenseService.getDeviceCountForLicense(newLicense.getId()) >= newLicense.getDeviceCount()) {
             ticket.setInfo("Активация невозможна");
             ticket.setStatus("Ошибка");
-            deviceServiceImpl.deleteLastDevice(user);
+            if (deviceLicenseRepository.findByDeviceId(device.getId()).isEmpty()) deviceService.deleteLastDevice(user);
             return ticket;
         }
 
@@ -169,7 +178,7 @@ public class LicenseServiceImpl implements LicenseService {
 
         deviceLicenseService.createDeviceLicense(newLicense, device);
         licenseRepository.save(newLicense);
-        licenseHistoryService.createNewRecord("Активно", "Действительная лицензия", user, newLicense);
+        licenseHistoryService.createNewRecord("Активирована", "Действительная лицензия", user, newLicense);
 
         ticket = createTicket(user, device, newLicense, "Лицензия была успешно активирована", "OK");
 
@@ -194,7 +203,7 @@ public class LicenseServiceImpl implements LicenseService {
         newLicense.setLicenseType(licenseTypeService.getLicenseTypeById(typeId).get());
         newLicense.setDuration(licenseTypeService.getLicenseTypeById(typeId).get().getDefaultDuration());
         newLicense.setBlocked(isBlocked);
-        newLicense.setOwnerId(userDetailsServiceImpl.getUserById(ownerId).get());
+        newLicense.setOwner(userDetailsService.getUserById(ownerId).get());
         newLicense.setDescription(description);
         newLicense.setDeviceCount(deviceCount);
 
@@ -215,7 +224,7 @@ public class LicenseServiceImpl implements LicenseService {
         ApplicationLicense newLicense = license.get();
         if (newLicense.isBlocked()
                 || newLicense.getEndingDate() != null && new Date().after(newLicense.getEndingDate())
-                || !Objects.equals(newLicense.getOwnerId().getId(), user.getId())
+                || !Objects.equals(newLicense.getOwner().getId(), user.getId())
                 || newLicense.getFirstActivationDate() == null) {
             ticket.setInfo("It is not possible to renew the license");
             ticket.setStatus("Error");

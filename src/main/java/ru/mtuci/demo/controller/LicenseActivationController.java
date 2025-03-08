@@ -15,10 +15,7 @@ import ru.mtuci.demo.model.ApplicationUser;
 import ru.mtuci.demo.request.LicenseActivationRequest;
 import ru.mtuci.demo.service.impl.DeviceServiceImpl;
 import ru.mtuci.demo.service.impl.LicenseServiceImpl;
-import ru.mtuci.demo.service.impl.UserDetailServiceImpl;
-
-import java.awt.geom.RectangularShape;
-import java.net.http.HttpResponse;
+import ru.mtuci.demo.service.impl.UserDetailsServiceImpl;
 
 @RestController
 @RequestMapping("/license")
@@ -27,7 +24,7 @@ public class LicenseActivationController {
 
     private final DeviceServiceImpl deviceService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserDetailServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
     private final LicenseServiceImpl licenseService;
 
     @PostMapping("/activate")

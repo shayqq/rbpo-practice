@@ -10,5 +10,5 @@ public interface DeviceLicenseRepository extends JpaRepository<ApplicationDevice
     Optional<ApplicationDeviceLicense> findById(Long id);
     List<ApplicationDeviceLicense> findByDeviceId(Long deviceId);
     Long countByLicenseId(Long licenseId);
-
+    List<ApplicationDeviceLicense> findByDeviceIdAndLicenseId(Long deviceId, Long licenseId);
 }

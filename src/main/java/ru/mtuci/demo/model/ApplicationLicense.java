@@ -43,7 +43,7 @@ public class ApplicationLicense {
 
     @ManyToOne
     @JoinColumn(name = "ownerId", referencedColumnName = "id")
-    private ApplicationUser ownerId;
+    private ApplicationUser owner;
 
     private Long duration;
 
