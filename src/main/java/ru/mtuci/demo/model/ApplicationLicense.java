@@ -34,11 +34,8 @@ public class ApplicationLicense {
     private ApplicationLicenseType licenseType;
 
     private Date firstActivationDate;
-
     private Date endingDate;
-
     private boolean blocked;
-
     private Long deviceCount;
 
     @ManyToOne
@@ -46,7 +43,6 @@ public class ApplicationLicense {
     private ApplicationUser owner;
 
     private Long duration;
-
     private String description;
 
 }

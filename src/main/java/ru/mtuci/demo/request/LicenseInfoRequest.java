@@ -7,10 +7,10 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LicenseTypeCreateRequest {
+public class LicenseInfoRequest {
 
     private String name;
-    private Long defaultDuration;
-    private String description;
+    private String mac_address;
+    private String code;
 
 }

@@ -22,7 +22,6 @@ public class ApplicationProduct {
     private Long id;
 
     private String name;
-
     private boolean isBlocked;
 
 }

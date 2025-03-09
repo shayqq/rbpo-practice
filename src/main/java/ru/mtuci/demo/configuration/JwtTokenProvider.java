@@ -31,60 +31,77 @@ public class JwtTokenProvider {
     private long expiration;
 
     private Key getSigningKey() {
+
         return Keys.hmacShaKeyFor(secret.getBytes());
+
     }
 
     public String createToken(String username, Set<GrantedAuthority> authorities) {
+
         Claims claims = Jwts.claims().setSubject(username);
+
         claims.put("auth", authorities.stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList())
         );
         claims.put("token_type", "access");
 
-        Date now = new Date();
-        Date expiationDate = new Date(now.getTime() + expiration);
+        Date currentDate = new Date();
+        Date expiationDate = new Date(currentDate.getTime() + expiration);
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(now)
+                .setIssuedAt(currentDate)
                 .setExpiration(expiationDate)
                 .signWith(getSigningKey())
                 .compact();
+
     }
 
     public String getTokenType(String token) {
+
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+
         return claims.get("token_type", String.class);
+
     }
 
     public boolean validateToken(String token) {
+
         try {
+
             Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);
+
             return true;
+
         } catch (Exception e) {
+
             return false;
+
         }
 
     }
 
     public String getUsername(String token) {
+
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+
     }
 
     public Set<GrantedAuthority> getAuthorities(String token) {
+
         return ((Collection<?>) Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -93,12 +110,16 @@ public class JwtTokenProvider {
                 .get("auth", Collection.class)).stream()
                 .map(authority -> new SimpleGrantedAuthority((String) authority))
                 .collect(Collectors.toSet());
+
     }
 
     public Authentication getAuthentication(String token) {
+
         String username = getUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
     }
 
 }

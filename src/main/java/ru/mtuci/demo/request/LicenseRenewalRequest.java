@@ -7,10 +7,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LicenseActivationRequest {
+public class LicenseRenewalRequest {
 
-    private String name;
-    private String mac_address;
     private String code;
 
 }

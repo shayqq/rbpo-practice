@@ -1,14 +1,11 @@
 package ru.mtuci.demo.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,20 +15,22 @@ import ru.mtuci.demo.model.ApplicationUser;
 import ru.mtuci.demo.request.AuthenticationRequest;
 import ru.mtuci.demo.model.AuthenticationResponse;
 import ru.mtuci.demo.repository.UserRepository;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
-    private final UserRepository userRepository;
-    private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest,
-                                   HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
+
         try {
+
             String email = authenticationRequest.getEmail();
 
             if (email == null)
@@ -40,18 +39,21 @@ public class AuthenticationController {
             if (authenticationRequest.getPassword() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите пароль!");
 
-            ApplicationUser user = userRepository.findByEmail(email).orElseThrow(() ->
-                    new UsernameNotFoundException("Пользователь не найден!"));
+            Optional<ApplicationUser> applicationUser = userRepository.findByEmail(email);
 
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                     email, authenticationRequest.getPassword()));
 
-            String token = jwtTokenProvider.createToken(email, user.getRole().getGrantedAuthorities());
+            String token = jwtTokenProvider.createToken(email, applicationUser.get().getRole().getGrantedAuthorities());
 
             return ResponseEntity.ok(new AuthenticationResponse(email, token));
+
         } catch (AuthenticationException e) {
+
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверная почта или пароль!");
+
         }
+
     }
 
 }

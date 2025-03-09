@@ -15,30 +15,23 @@ public class LicenseTypeServiceImpl implements LicenseTypeService {
 
     @Override
     public Optional<ApplicationLicenseType> getLicenseTypeById(Long id) {
+
         return licenseTypeRepository.findById(id);
+
     }
 
     @Override
-    public Long createLicenseType(Long duration, String description, String name) {
+    public Long createLicenseType(String name, Long defaultDuration, String description) {
+
         ApplicationLicenseType licenseType = new ApplicationLicenseType();
-        licenseType.setDescription(description);
         licenseType.setName(name);
-        licenseType.setDefaultDuration(duration);
+        licenseType.setDefaultDuration(defaultDuration);
+        licenseType.setDescription(description);
+
         licenseTypeRepository.save(licenseType);
+
         return licenseTypeRepository.findTopByOrderByIdDesc().get().getId();
-    }
 
-    @Override
-    public String upadteLicenseType(Long id, Long duration, String description, String name) {
-        Optional<ApplicationLicenseType> licenseType = getLicenseTypeById(id);
-        if (licenseType.isEmpty()) return "License Type Not Found";
-
-        ApplicationLicenseType newlicenseType = licenseType.get();
-        newlicenseType.setName(name);
-        newlicenseType.setDefaultDuration(duration);
-        newlicenseType.setDescription(description);
-        licenseTypeRepository.save(newlicenseType);
-        return "OK";
     }
 
 }

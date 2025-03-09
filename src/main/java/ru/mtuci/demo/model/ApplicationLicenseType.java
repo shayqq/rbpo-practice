@@ -22,9 +22,7 @@ public class ApplicationLicenseType {
     private Long id;
 
     private String name;
-
     private Long defaultDuration;
-
     private String description;
 
 }

@@ -20,15 +20,17 @@ public class RegistrationController {
 
     @PostMapping("/registration")
     public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest) {
-        try {
-            if (registrationRequest.getUsername() == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите логин");
 
-            if (registrationRequest.getPassword() == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите пароль");
+        try {
+
+            if (registrationRequest.getUsername() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите логин!");
 
             if (registrationRequest.getEmail() == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите почту");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите почту!");
+
+            if (registrationRequest.getPassword() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите пароль!");
 
             if (userRepository.findByUsername(registrationRequest.getUsername()).isPresent())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Пользователь с таким логином уже существует!");
@@ -36,20 +38,24 @@ public class RegistrationController {
             if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Данная почта уже используется!");
 
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
-            ApplicationUser newUser = new ApplicationUser();
-            newUser.setUsername(registrationRequest.getUsername());
-            newUser.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
-            newUser.setEmail(registrationRequest.getEmail());
-            newUser.setRole(ApplicationRole.USER);
+            ApplicationUser applicationUser = new ApplicationUser();
+            applicationUser.setUsername(registrationRequest.getUsername());
+            applicationUser.setEmail(registrationRequest.getEmail());
+            applicationUser.setPassword(bCryptPasswordEncoder.encode(registrationRequest.getPassword()));
+            applicationUser.setRole(ApplicationRole.USER);
 
-            userRepository.save(newUser);
+            userRepository.save(applicationUser);
 
-            return ResponseEntity.status(HttpStatus.OK).body("Регистрация успешно произведена!");
+            return ResponseEntity.status(HttpStatus.OK).body("Регистрация прошла успешно!");
+
         } catch(Exception e) {
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
+
         }
+
     }
 
 }

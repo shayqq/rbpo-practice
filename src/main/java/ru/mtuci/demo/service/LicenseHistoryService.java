@@ -6,7 +6,7 @@ import ru.mtuci.demo.model.ApplicationUser;
 
 public interface LicenseHistoryService {
 
-    ApplicationLicenseHistory createNewRecord(String status, String description,
-                                              ApplicationUser user, ApplicationLicense license);
+    ApplicationLicenseHistory createNewRecord(ApplicationLicense applicationLicense, ApplicationUser applicationUser,
+                                              String status, String description);
 
 }

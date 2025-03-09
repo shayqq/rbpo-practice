@@ -15,24 +15,33 @@ public class DeviceServiceImpl implements DeviceService {
     private final DeviceRepository deviceRepository;
 
     @Override
-    public Optional<ApplicationDevice> getDeviceByInfo(ApplicationUser user, String mac_address, String name) {
-        return deviceRepository.findByUserAndMacAddressAndName(user, mac_address, name);
+    public Optional<ApplicationDevice> getDeviceByInfo(String name, String mac_address, ApplicationUser applicationUser) {
+
+        return deviceRepository.findByNameAndMacAddressAndUser(name, mac_address, applicationUser);
+
     }
 
     @Override
-    public void deleteLastDevice(ApplicationUser user) {
-        Optional<ApplicationDevice> lastDevice = deviceRepository.findTopByUserOrderByIdDesc(user);
-        lastDevice.ifPresent(deviceRepository::delete);
+    public void deleteLastDevice(ApplicationUser applicationUser) {
+
+        Optional<ApplicationDevice> applicationDevice = deviceRepository.findTopByUserOrderByIdDesc(applicationUser);
+        applicationDevice.ifPresent(deviceRepository::delete);
+
     }
 
     @Override
-    public ApplicationDevice registerOrUpdateDevice(String mac, String name, ApplicationUser user) {
-        if (getDeviceByInfo(user, mac, name).isPresent()) return getDeviceByInfo(user, mac, name).get();
-        ApplicationDevice newDevice = new ApplicationDevice();
-        newDevice.setName(name);
-        newDevice.setMacAddress(mac);
-        newDevice.setUser(user);
-        return deviceRepository.save(newDevice);
+    public ApplicationDevice registerDevice(String name, String mac_address, ApplicationUser applicationUser) {
+
+        if (getDeviceByInfo(name, mac_address, applicationUser).isPresent())
+            return getDeviceByInfo(name, mac_address, applicationUser).get();
+
+        ApplicationDevice applicationDevice = new ApplicationDevice();
+        applicationDevice.setName(name);
+        applicationDevice.setMacAddress(mac_address);
+        applicationDevice.setUser(applicationUser);
+
+        return deviceRepository.save(applicationDevice);
+
     }
 
 }

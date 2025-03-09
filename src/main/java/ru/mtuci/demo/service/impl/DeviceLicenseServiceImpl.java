@@ -18,21 +18,29 @@ public class DeviceLicenseServiceImpl implements DeviceLicenseService {
 
     @Override
     public Long getDeviceCountForLicense(Long licenseId) {
+
         return deviceLicenseRepository.countByLicenseId(licenseId);
+
     }
 
     @Override
-    public List<ApplicationDeviceLicense> getAllLicenseById(ApplicationDevice device) {
-        return deviceLicenseRepository.findByDeviceId(device.getId());
+    public List<ApplicationDeviceLicense> getAllLicenseById(ApplicationDevice applicationDevice) {
+
+        return deviceLicenseRepository.findByDeviceId(applicationDevice.getId());
+
     }
 
     @Override
-    public ApplicationDeviceLicense createDeviceLicense(ApplicationLicense license, ApplicationDevice device) {
-        ApplicationDeviceLicense newLicense = new ApplicationDeviceLicense();
-        newLicense.setLicense(license);
-        newLicense.setDevice(device);
-        newLicense.setActivationDate(new Date());
-        return deviceLicenseRepository.save(newLicense);
+    public ApplicationDeviceLicense createDeviceLicense(ApplicationLicense applicationLicense,
+                                                        ApplicationDevice applicationDevice) {
+
+        ApplicationDeviceLicense applicationDeviceLicense = new ApplicationDeviceLicense();
+        applicationDeviceLicense.setLicense(applicationLicense);
+        applicationDeviceLicense.setDevice(applicationDevice);
+        applicationDeviceLicense.setActivationDate(new Date());
+
+        return deviceLicenseRepository.save(applicationDeviceLicense);
+
     }
 
 }

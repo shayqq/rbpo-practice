@@ -16,15 +16,18 @@ public class LicenseHistoryServiceImpl implements LicenseHistoryService {
     private final LicenseHistoryRepository licenseHistoryRepository;
 
     @Override
-    public ApplicationLicenseHistory createNewRecord(String status, String description,
-                                                     ApplicationUser user, ApplicationLicense license) {
-        ApplicationLicenseHistory newHistory = new ApplicationLicenseHistory();
-        newHistory.setLicense(license);
-        newHistory.setStatus(status);
-        newHistory.setChangeDate(new Date());
-        newHistory.setDescription(description);
-        newHistory.setUser(user);
-        return licenseHistoryRepository.save(newHistory);
+    public ApplicationLicenseHistory createNewRecord(ApplicationLicense applicationLicense, ApplicationUser applicationUser,
+                                                     String status, String description) {
+
+        ApplicationLicenseHistory applicationLicenseHistory = new ApplicationLicenseHistory();
+        applicationLicenseHistory.setLicense(applicationLicense);
+        applicationLicenseHistory.setUser(applicationUser);
+        applicationLicenseHistory.setStatus(status);
+        applicationLicenseHistory.setChangeDate(new Date());
+        applicationLicenseHistory.setDescription(description);
+
+        return licenseHistoryRepository.save(applicationLicenseHistory);
+
     }
 
 }

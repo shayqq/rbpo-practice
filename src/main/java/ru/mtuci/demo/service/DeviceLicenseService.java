@@ -8,7 +8,7 @@ import java.util.List;
 public interface DeviceLicenseService {
 
     Long getDeviceCountForLicense(Long licenseId);
-    List<ApplicationDeviceLicense> getAllLicenseById(ApplicationDevice device);
-    ApplicationDeviceLicense createDeviceLicense(ApplicationLicense license, ApplicationDevice device);
+    List<ApplicationDeviceLicense> getAllLicenseById(ApplicationDevice applicationDevice);
+    ApplicationDeviceLicense createDeviceLicense(ApplicationLicense applicationLicense, ApplicationDevice applicationDevice);
 
 }

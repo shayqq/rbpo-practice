@@ -16,30 +16,40 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
+
         return isActive;
+
     }
 
     @Override
     public boolean isAccountNonLocked() {
+
         return isActive;
+
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
+
         return isActive;
+
     }
 
     @Override
     public boolean isEnabled() {
+
         return isActive;
+
     }
 
     public static UserDetails fromApplicationUser(ApplicationUser user) {
+
         return new User(
                 user.getEmail(),
                 user.getPassword(),
                 user.getRole().getGrantedAuthorities()
         );
+
     }
 
 }

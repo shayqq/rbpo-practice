@@ -21,7 +21,9 @@ public class ProductCreateController {
     @PostMapping("/createadm")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createadm(@RequestBody ProductCreateRequest productCreateRequest) {
+
         try {
+
             if (productCreateRequest.getName() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите наименование продукта!");
 
@@ -29,10 +31,15 @@ public class ProductCreateController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите состояние продукта!");
 
             Long id = productService.createProduct(productCreateRequest.getName(), productCreateRequest.getIsBlocked());
+
             return ResponseEntity.status(HttpStatus.OK).body("Продукт успешно создан!\nID: " + id);
+
         } catch (Exception e) {
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
+
         }
+
     }
 
 }

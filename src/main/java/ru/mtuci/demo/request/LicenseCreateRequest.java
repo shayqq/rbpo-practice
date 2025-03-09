@@ -10,8 +10,8 @@ import lombok.*;
 public class LicenseCreateRequest {
 
     private Long productId;
-    private Long ownerId;
     private Long licenseTypeId;
-    private Long count;
+    private Long deviceCount;
+    private Long ownerId;
 
 }

@@ -12,6 +12,8 @@ import java.util.Date;
 @Setter
 public class ApplicationTicket {
 
+    private String status;
+    private String info;
     private Date currentDate;
     private Date lifetime;
     private Date activationDate;
@@ -20,7 +22,5 @@ public class ApplicationTicket {
     private Long deviceId;
     private boolean licenseBlocked;
     private String digitalSignature;
-    private String info;
-    private String status;
 
 }

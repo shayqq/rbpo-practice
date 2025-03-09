@@ -22,34 +22,36 @@ import ru.mtuci.demo.service.impl.UserDetailsServiceImpl;
 @RequiredArgsConstructor
 public class LicenseCreateController {
 
-    private final ProductServiceImpl productService;
-    private final UserDetailsServiceImpl userService;
-    private final LicenseTypeServiceImpl licenseTypeService;
-    private final LicenseServiceImpl licenseService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final LicenseServiceImpl licenseService;
+    private final LicenseTypeServiceImpl licenseTypeService;
+    private final ProductServiceImpl productService;
     private final UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userService;
 
     @PostMapping("/createadm")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createadm(@RequestBody LicenseCreateRequest licenseCreateRequest,
                                            HttpServletRequest httpServletRequest) {
+
         try {
+
             Long productId = licenseCreateRequest.getProductId();
-            Long ownerId = licenseCreateRequest.getOwnerId();
             Long licenseTypeId = licenseCreateRequest.getLicenseTypeId();
+            Long ownerId = licenseCreateRequest.getOwnerId();
 
             if (productId == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id продукта!");
 
-            if (ownerId == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id владельца!");
-
             if (licenseTypeId == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id типа лицензии!");
 
-            if (licenseCreateRequest.getCount() == null || licenseCreateRequest.getCount() <= 0)
+            if (licenseCreateRequest.getDeviceCount() == null || licenseCreateRequest.getDeviceCount() <= 0)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Введите количество девайсов, на которых может быть размещена лицензия!");
+
+            if (ownerId == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите id владельца!");
 
             if (productService.getProductById(productId).isEmpty())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Продукт не найден!");
@@ -57,21 +59,26 @@ public class LicenseCreateController {
             if (productService.getProductById(productId).get().isBlocked())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Продукт не доступен!");
 
-            if (userService.getUserById(ownerId).isEmpty())
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Владелец не найден!");
-
             if (licenseTypeService.getLicenseTypeById(licenseTypeId).isEmpty())
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Тип лицензии не найден!");
 
+            if (userService.getUserById(ownerId).isEmpty())
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Владелец не найден!");
+
             String email = jwtTokenProvider.getUsername(httpServletRequest.getHeader("Authorization").substring(7));
-            ApplicationUser user = userDetailsService.getUserByEmail(email).get();
+            ApplicationUser applicationUser = userDetailsService.getUserByEmail(email).get();
 
-            Long id = licenseService.createLicense(productId, ownerId, licenseTypeId, user, licenseCreateRequest.getCount());
+            Long id = licenseService.createLicense(applicationUser, productId, licenseTypeId,
+                    licenseCreateRequest.getDeviceCount(), ownerId);
 
-            return ResponseEntity.status(HttpStatus.OK).body("Лицензия успешно создана\nID: " + id);
+            return ResponseEntity.status(HttpStatus.OK).body("Лицензия успешно создана!\nID: " + id);
+
         } catch (Exception e) {
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
+
         }
+
     }
 
 }

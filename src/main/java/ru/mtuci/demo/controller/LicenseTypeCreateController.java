@@ -21,22 +21,28 @@ public class LicenseTypeCreateController {
     @PostMapping("/createadm")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createadm(@RequestBody LicenseTypeCreateRequest licenseTypeCreateRequest) {
+
         try {
-            if(licenseTypeCreateRequest.getDuration() == null)
+
+            if(licenseTypeCreateRequest.getName() == null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Имя типа лицензии!");
+
+            if(licenseTypeCreateRequest.getDefaultDuration() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите срок действия лицензии!");
 
             if (licenseTypeCreateRequest.getDescription() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите описание лицензии!");
 
-            if(licenseTypeCreateRequest.getName() == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Имя типа лицензии!");
+            Long id = licenseTypeService.createLicenseType(licenseTypeCreateRequest.getName(),
+                    licenseTypeCreateRequest.getDefaultDuration(), licenseTypeCreateRequest.getDescription());
 
-            Long id = licenseTypeService.createLicenseType(licenseTypeCreateRequest.getDuration(),
-                    licenseTypeCreateRequest.getDescription(), licenseTypeCreateRequest.getName());
             return ResponseEntity.status(HttpStatus.OK).body("Новый тип лицензии создан!\nID: " + id);
+
         } catch (Exception e) {
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
         }
+
     }
 
 }

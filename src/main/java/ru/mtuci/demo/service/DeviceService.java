@@ -6,8 +6,8 @@ import java.util.Optional;
 
 public interface DeviceService {
 
-    Optional<ApplicationDevice> getDeviceByInfo(ApplicationUser user, String mac_address, String name);
-    void deleteLastDevice(ApplicationUser user);
-    ApplicationDevice registerOrUpdateDevice(String mac, String name, ApplicationUser user);
+    Optional<ApplicationDevice> getDeviceByInfo(String name, String mac_address, ApplicationUser applicationUser);
+    void deleteLastDevice(ApplicationUser applicationUser);
+    ApplicationDevice registerDevice(String name, String mac_address, ApplicationUser applicationUser);
 
 }

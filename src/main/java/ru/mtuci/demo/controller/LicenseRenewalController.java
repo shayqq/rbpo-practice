@@ -9,46 +9,35 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.mtuci.demo.configuration.JwtTokenProvider;
-import ru.mtuci.demo.model.ApplicationDevice;
 import ru.mtuci.demo.model.ApplicationTicket;
 import ru.mtuci.demo.model.ApplicationUser;
-import ru.mtuci.demo.request.LicenseActivationRequest;
-import ru.mtuci.demo.service.impl.DeviceServiceImpl;
+import ru.mtuci.demo.request.LicenseRenewalRequest;
 import ru.mtuci.demo.service.impl.LicenseServiceImpl;
 import ru.mtuci.demo.service.impl.UserDetailsServiceImpl;
 
 @RestController
 @RequestMapping("/license")
 @RequiredArgsConstructor
-public class LicenseActivationController {
+public class LicenseRenewalController {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final DeviceServiceImpl deviceService;
     private final LicenseServiceImpl licenseService;
     private final UserDetailsServiceImpl userDetailsService;
 
-    @PostMapping("/activate")
-    public ResponseEntity<?> activate(@RequestBody LicenseActivationRequest licenseActivationRequest,
-                                      HttpServletRequest httpServletRequest) {
+    @PostMapping("/renewal")
+    public ResponseEntity<?> renewal(@RequestBody LicenseRenewalRequest licenseRenewalRequest,
+                                            HttpServletRequest httpServletRequest) {
 
         try {
 
-            if (licenseActivationRequest.getName() == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите имя!");
-
-            if (licenseActivationRequest.getMac_address() == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите MAC-Адрес!");
-
-            if (licenseActivationRequest.getCode() == null)
+            if (licenseRenewalRequest.getCode() == null)
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Введите код активации!");
 
             String email = jwtTokenProvider.getUsername(httpServletRequest.getHeader("Authorization").substring(7));
             ApplicationUser applicationUser = userDetailsService.getUserByEmail(email).get();
-            ApplicationDevice applicationDevice = deviceService.registerDevice(licenseActivationRequest.getName(),
-                    licenseActivationRequest.getMac_address(), applicationUser);
 
-            ApplicationTicket applicationTicket = licenseService.activateLicense(licenseActivationRequest.getCode(),
-                    applicationUser, applicationDevice);
+            ApplicationTicket applicationTicket = licenseService.renewalLicense(licenseRenewalRequest.getCode(),
+                    applicationUser);
 
             if (!applicationTicket.getStatus().equals("OK"))
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(applicationTicket.getInfo());

@@ -28,9 +28,7 @@ public class ApplicationLicenseHistory {
     private ApplicationUser user;
 
     private String status;
-
     private Date changeDate;
-
     private String description;
 
 }
