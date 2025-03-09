@@ -16,7 +16,6 @@ import ru.mtuci.demo.request.LicenseInfoRequest;
 import ru.mtuci.demo.service.impl.DeviceServiceImpl;
 import ru.mtuci.demo.service.impl.LicenseServiceImpl;
 import ru.mtuci.demo.service.impl.UserDetailsServiceImpl;
-
 import java.util.Optional;
 
 @RestController
