@@ -1,11 +1,14 @@
 package ru.mtuci.demo.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import ru.mtuci.demo.configuration.JwtTokenProvider;
 import ru.mtuci.demo.configuration.SecurityConfig;
 import ru.mtuci.demo.model.ApplicationRole;
 import ru.mtuci.demo.model.ApplicationUser;
@@ -15,52 +18,44 @@ import ru.mtuci.demo.request.RegistrationRequest;
 import ru.mtuci.demo.request.RequestUser;
 import ru.mtuci.demo.service.impl.UserServiceImpl;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
 
+    private final JwtTokenProvider jwtTokenProvider;
     private final SecurityConfig securityConfig;
     private final UserRepository userRepository;
     private final UserServiceImpl userService;
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/showAlladm")
-    public ResponseEntity<?> showAlladm() {
-
-        try {
-
-            List<ApplicationUser> applicationUsers = userService.getAll();
-
-            return ResponseEntity.status(HttpStatus.OK).body(applicationUsers);
-
-        }
-        catch (Exception e) {
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Технические шоколадки...");
-
-        }
-
-    }
-
     @GetMapping("/showAll")
-    public ResponseEntity<?> showAll() {
+    public ResponseEntity<?> showAll(HttpServletRequest httpServletRequest) {
 
         try {
 
             List<ApplicationUser> applicationUsers = userService.getAll();
 
-            List<RequestUser> requestUsers = applicationUsers.stream().map(
-                    applicationUser -> new RequestUser(
-                            applicationUser.getId(),
-                            applicationUser.getUsername(),
-                            applicationUser.getEmail(),
-                            applicationUser.getRole()
-                    )
-            ).toList();
+            Set<GrantedAuthority> authorities = jwtTokenProvider.getAuthorities(httpServletRequest
+                    .getHeader("Authorization").substring(7));
 
-            return ResponseEntity.status(HttpStatus.OK).body(requestUsers);
+            if (authorities.stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN")))
+                return ResponseEntity.status(HttpStatus.OK).body(applicationUsers);
+
+            if (authorities.stream().anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_USER"))) {
+                List<RequestUser> requestUsers = applicationUsers.stream().map(
+                        applicationUser -> new RequestUser(
+                                applicationUser.getId(),
+                                applicationUser.getUsername(),
+                                applicationUser.getEmail(),
+                                applicationUser.getRole()
+                        )
+                ).toList();
+                return ResponseEntity.status(HttpStatus.OK).body(requestUsers);
+            }
+
+            throw new Exception();
 
         }
         catch (Exception e) {
