@@ -1,13 +1,11 @@
 package ru.mtuci.demo.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.mtuci.demo.model.*;
 import ru.mtuci.demo.repository.DeviceLicenseRepository;
 import ru.mtuci.demo.repository.LicenseRepository;
 import ru.mtuci.demo.service.LicenseService;
-import java.security.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,6 +20,7 @@ public class LicenseServiceImpl implements LicenseService {
     private final LicenseHistoryServiceImpl licenseHistoryService;
     private final LicenseTypeServiceImpl licenseTypeService;
     private final ProductServiceImpl productService;
+    private final TicketServiceImpl ticketService;
     private final UserDetailsServiceImpl userDetailsService;
 
     @Override
@@ -60,7 +59,7 @@ public class LicenseServiceImpl implements LicenseService {
         List<ApplicationDeviceLicense> applicationDeviceLicenses = deviceLicenseService.getAllLicenseById(applicationDevice);
 
         List<Long> licenseIds = applicationDeviceLicenses.stream()
-                .map(license -> license.getLicense() != null ? license.getLicense().getId() : null)
+                .map(license -> license.getLicense() != null ? license.getLicense().getId() : null)//условие можно убрать
                 .collect(Collectors.toList());
 
         Optional<ApplicationLicense> applicationLicense = licenseRepository.findByIdInAndCode(licenseIds, code);
@@ -73,43 +72,8 @@ public class LicenseServiceImpl implements LicenseService {
             return applicationTicket;
         }
 
-        applicationTicket = createTicket("OK", "Информация о лицензиях", applicationLicense.get(),
+        applicationTicket = ticketService.createTicket("OK", "Информация о лицензиях", applicationLicense.get(),
                 applicationLicense.get().getUser(), applicationDevice);
-
-        return applicationTicket;
-
-    }
-
-    @Override
-    public ApplicationTicket createTicket(String status, String info, ApplicationLicense applicationLicense,
-                                          ApplicationUser applicationUser, ApplicationDevice applicationDevice) {
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.HOUR_OF_DAY, 3);
-
-        ApplicationTicket applicationTicket = new ApplicationTicket();
-
-        applicationTicket.setStatus(status);
-        applicationTicket.setInfo(info);
-        applicationTicket.setCurrentDate(calendar.getTime());
-        applicationTicket.setLifetime(calendar.getTime());
-
-        if (applicationLicense != null) {
-            calendar.setTime(applicationLicense.getFirstActivationDate());
-            calendar.add(Calendar.HOUR_OF_DAY, 3);
-            applicationTicket.setActivationDate(calendar.getTime());
-            calendar.setTime(applicationLicense.getEndingDate());
-            calendar.add(Calendar.HOUR_OF_DAY, 3);
-            applicationTicket.setExpirationDate(calendar.getTime());
-            applicationTicket.setLicenseBlocked(applicationLicense.isBlocked());
-        }
-
-        if (applicationUser != null) applicationTicket.setUserId(applicationUser.getId());
-
-        if (applicationDevice != null) applicationTicket.setDeviceId(applicationDevice.getId());
-
-        applicationTicket.setDigitalSignature(makeSignature(applicationTicket));
 
         return applicationTicket;
 
@@ -165,7 +129,7 @@ public class LicenseServiceImpl implements LicenseService {
         licenseHistoryService.createNewRecord(applicationLicense1, applicationUser, "Активирована",
                 "Действительная лицензия");
 
-        applicationTicket = createTicket("OK", "Лицензия была успешно активирована", applicationLicense1,
+        applicationTicket = ticketService.createTicket("OK", "Лицензия была успешно активирована", applicationLicense1,
                 applicationUser, applicationDevice);
 
         return applicationTicket;
@@ -204,36 +168,10 @@ public class LicenseServiceImpl implements LicenseService {
         licenseHistoryService.createNewRecord(applicationLicense1, applicationUser,"Продление",
                 "Действительная лицензия");
 
-        applicationTicket = createTicket("OK", "Лицензия успешно продлена", applicationLicense1,
+        applicationTicket = ticketService.createTicket("OK", "Лицензия успешно продлена", applicationLicense1,
                 applicationUser, null);
 
         return applicationTicket;
-
-    }
-
-    private String makeSignature(ApplicationTicket applicationTicket) {
-
-        try {
-
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
-            PrivateKey privateKey = keyPair.getPrivate();
-            PublicKey publicKey = keyPair.getPublic();
-            ObjectMapper objectMapper = new ObjectMapper();
-            String res = objectMapper.writeValueAsString(applicationTicket);
-
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(privateKey);
-            signature.update(res.getBytes());
-
-            return Base64.getEncoder().encodeToString(signature.sign());
-
-        } catch (Exception e) {
-
-            return "Что-то пошло не так. Подпись не действительна";
-
-        }
 
     }
 

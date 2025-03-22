@@ -9,8 +9,6 @@ public interface LicenseService {
 
     Long createLicense(ApplicationUser applicationUser, Long productId, Long licenseTypeId, Long deviceCount,  Long ownerId);
     ApplicationTicket getActiveLicensesForDevice(ApplicationDevice applicationDevice, String code);
-    ApplicationTicket createTicket(String status, String info, ApplicationLicense applicationLicense,
-                                   ApplicationUser applicationUser, ApplicationDevice applicationDevice);
     ApplicationTicket activateLicense(String code, ApplicationUser applicationUser, ApplicationDevice applicationDevice);
     ApplicationTicket renewalLicense(String code, ApplicationUser applicationUser);
 

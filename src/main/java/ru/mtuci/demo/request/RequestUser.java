@@ -4,7 +4,6 @@ import lombok.*;
 import ru.mtuci.demo.model.ApplicationRole;
 
 @Data
-@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
